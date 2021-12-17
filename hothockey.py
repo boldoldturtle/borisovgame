@@ -3,31 +3,33 @@ import random
 import sys
 
 pygame.init()
-screen = pygame.display.set_mode((600,700)) #размер окна
+screen = pygame.display.set_mode((600,700))
 pygame.display.set_caption('hot hockey(не очень хот)') #название
 bg_color = (0, 0, 0) #фон она
-x=50 #начальные координаты первой ракетки
+x=50  #начальные координаты первой ракетки#
 y=240 #начальные координаты первой ракетки
 y1=240 #начальные координаты второй ракетки
-width=10
-height=80
-speed=4
-h=0
-x1 = 550-width
-ballx=300
-bally=270
-speedball=10
+width=10 #ширина платформы
+height=80 #длина платформы
+speed=4 #скорость платформ
+h=0 #дополнительный индикатор
+k=0 #подсчет количества касаний платформами
+x1 = 550-width #начальные координаты второй ракетки
+ballx=300 #начальные координаты мяча
+bally=270 #начальные координаты мяча
+speedball=10 #скорость мяча
 key=0  #индикатор кто бьет
-gol1=0
-gol2=0
-otskok=[-1,-2,1,2]
-r=10
-pobed1=pygame.image.load('p1.jpg')
-pobed2 = pygame.image.load('p2.jpg')
+gol1='0' #счет первого игрока
+gol2='0' #счет второго игрока
+otskok=[-1,-2,1,2] #список возможных ударов
+r=10 #радиус мяча
+pobed1=pygame.image.load('pictures/p1.jpg') #экран победы для 1 игрока
+pobed2 = pygame.image.load('pictures/p2.jpg') #экран победы для 2 игрока
 vrezanie=0   #индикатор врезания в границы верх и низ
-a = random.randint(0, 1)
+a = random.randint(0, 1) #индикатор отвечающий за начало(в какую сторону полетит мяч)
 
 def raketki():
+    '''Функция движения платформ'''
     global y
     global y1
     global speed
@@ -41,8 +43,11 @@ def raketki():
         y1 += speed
     if keys[pygame.K_w] and y1 > 0:
         y1 -= speed
+    c=[y,y1]
+    return c
 
 def ball():
+    '''Функция движения мяча'''
     global height
     global speed
     global h
@@ -56,6 +61,8 @@ def ball():
     global otskok
     global r
     global z
+    global k
+
     if bally <= 0 + r:
         key = 3
 
@@ -71,9 +78,11 @@ def ball():
     if ballx == x + width + r and y - height // 2 + r * 3 <= bally <= y + height + r:
         key = 1
         h = 1
+        k+=1
     if ballx == x1 - r and y1 - height // 2 + r * 3 <= bally <= y1 + height + r:
         key = 2
         h = 2
+        k+=1
     if (ballx == x + width + r and y - height // 2 + r * 3 <= bally <= y + height + r) or (
             ballx == x1 - r and y1 - height // 2 + r * 3 <= bally <= y1 + height + r):
         z = random.choice(otskok)
@@ -97,8 +106,11 @@ def ball():
             ballx += speedball
         if h == 2:
             ballx -= speedball
+    return k
+
 
 def goal():
+    '''Функция, отвечающая за забитие гола'''
     global height
     global speed
     global h
@@ -119,8 +131,10 @@ def goal():
         gol1 = str(int(gol1) + 1)
         ballx = 300
         bally = 270
-
+    d=[gol1,gol2]
+    return d
 def pobed():
+    '''Функция, показывающая, кто победил'''
     global height
     global speed
     global h
@@ -136,12 +150,14 @@ def pobed():
     if int(gol1) == 10:
         key = 5
         screen.blit(pobed1, (0, 0))
+        return 'Player1 win'
     if int(gol2) == 10:
         key = 5
         screen.blit(pobed2, (0, 0))
+        return 'Player2 win'
 
 def zapusk():
-
+    '''Функция инициализации платформ, мяча, экрана'''
     screen.fill(bg_color)
     pygame.display.flip()
     pygame.draw.rect(screen, (255, 255, 255), (x, y, width, height))
@@ -150,7 +166,7 @@ def zapusk():
     pygame.draw.circle(screen, (255, 255, 255), (ballx, bally), r)  # мячик и что с ним связано
 
 def run():
-
+    '''Функция-цикл, отвечающая за работу игры и выход из нее'''
     k=True
 
     while k:
@@ -160,6 +176,7 @@ def run():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 k=False
+                return 'Game closed'
         raketki()
         zapusk()
         ball()
